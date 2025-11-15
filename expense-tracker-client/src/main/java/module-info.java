@@ -5,4 +5,9 @@ module expense.tracker.client {
     requires com.google.gson;
 
     exports org.example;
+    opens org.example.controllers to javafx.fxml;
+    opens org.example.views to javafx.fxml;
+
+    // FIX for TableView reflection access
+    opens org.example.models to javafx.base;
 }

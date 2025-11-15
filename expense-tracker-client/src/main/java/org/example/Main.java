@@ -14,8 +14,6 @@ public class Main extends Application {
         ViewNavigator.setMainStage(stage);
         new LoginView().show();
     }
-
-    // ADD THIS MAIN METHOD
     public static void main(String[] args) {
         launch(args);
     }

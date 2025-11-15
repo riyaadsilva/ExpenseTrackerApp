@@ -38,14 +38,14 @@ public class Transaction {
     @Column(name = "transaction_type")
     private String transactionType;
 
-    @Column(name= "location")
-    private String locationName;
-
-    @Column(name = "latitude")
-    private Double latitude;
-
-    @Column(name = "longitude")
-    private Double longitude;
+//    @Column(name= "location")
+//    private String locationName;
+//
+//    @Column(name = "latitude")
+//    private Double latitude;
+//
+//    @Column(name = "longitude")
+//    private Double longitude;
 
     public Integer getId() {
         return id;
@@ -99,17 +99,17 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
-    public String getLocationName() {return locationName; }
-
-    public void setLocationName(String locationName) { this.locationName = locationName; }
-
-    public Double getLatitude() { return latitude; }
-
-    public void setLatitude(Double latitude) { this.latitude = latitude; }
-
-    public Double getLongitude() { return longitude; }
-
-    public void setLongitude(Double longitude) { this.longitude = longitude; }
+//    public String getLocationName() {return locationName; }
+//
+//    public void setLocationName(String locationName) { this.locationName = locationName; }
+//
+//    public Double getLatitude() { return latitude; }
+//
+//    public void setLatitude(Double latitude) { this.latitude = latitude; }
+//
+//    public Double getLongitude() { return longitude; }
+//
+//    public void setLongitude(Double longitude) { this.longitude = longitude; }
 }
 
 
