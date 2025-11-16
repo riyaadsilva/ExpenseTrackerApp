@@ -1,5 +1,6 @@
 package org.example.controllers;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -31,12 +32,15 @@ public class DashboardController {
 
     private int currentPage;
     private int currentYear;
+    private String currentBaseCurrency = "INR";
+
 
     public DashboardController(DashboardView dashboardView){
         this.dashboardView = dashboardView;
         currentYear = dashboardView.getYearComboBox().getValue();
+        currentPage = 0;
         fetchUserData();
-        intialize();
+        initialize();
 
     }
 
@@ -103,9 +107,9 @@ public class DashboardController {
         currentBalance = currentBalance.setScale(2, RoundingMode.HALF_UP);
 
         // update view
-        dashboardView.getTotalExpense().setText("$" + totalExpense);
-        dashboardView.getTotalIncome().setText("$" + totalIncome);
-        dashboardView.getCurrentBalance().setText("$" + currentBalance);
+        dashboardView.getTotalExpense().setText("" + totalExpense);
+        dashboardView.getTotalIncome().setText("" + totalIncome);
+        dashboardView.getCurrentBalance().setText("" + currentBalance);
     }
 
     private void createRecentTransactionComponents(){
@@ -153,12 +157,44 @@ public class DashboardController {
         return monthlyFinances;
     }
 
-    private void intialize(){
+    private void initialize(){
         addMenuActions();
         addRecentTransactionActions();
         addComboBoxActions();
         addViewChartAction();
         addTableActions();
+        addCurrencyConversionAction();
+    }
+
+    private void addCurrencyConversionAction() {
+        dashboardView.getConvertCurrencyButton().setOnAction(e -> {
+            try {
+                String from = currentBaseCurrency; // dynamic base currency
+                String to = dashboardView.getToCurrencyDrop().getValue();
+
+                // Fetch rate FROM -> TO
+                double rate = SqlUtil.fetchRate(from, to);
+
+                // Fetch current values
+                BigDecimal income = new BigDecimal(dashboardView.getTotalIncome().getText());
+                BigDecimal expense = new BigDecimal(dashboardView.getTotalExpense().getText());
+                BigDecimal balance = new BigDecimal(dashboardView.getCurrentBalance().getText());
+
+                // Convert values
+                BigDecimal newIncome = income.multiply(BigDecimal.valueOf(rate)).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal newExpense = expense.multiply(BigDecimal.valueOf(rate)).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal newBalance = balance.multiply(BigDecimal.valueOf(rate)).setScale(2, RoundingMode.HALF_UP);
+
+                // Update UI
+                dashboardView.getTotalIncome().setText(newIncome.toString());
+                dashboardView.getTotalExpense().setText(newExpense.toString());
+                dashboardView.getCurrentBalance().setText(newBalance.toString());
+
+                currentBaseCurrency = to;
+
+            } catch (Exception ex) {
+            }
+        });
     }
 
     private void addMenuActions(){
@@ -189,6 +225,9 @@ public class DashboardController {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 new CreateOrEditTransactionDialog(DashboardController.this, false).showAndWait();
+                fetchUserData();
+                System.out.println("Recent transactions fetched: " + recentTransactions.size());
+
             }
         });
     }

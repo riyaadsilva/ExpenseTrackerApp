@@ -9,23 +9,17 @@ public class Transaction {
     private double transactionAmount;
     private LocalDate transactionDate;
     private String transactionType;
-    private String locationName;
-    private Double latitude;
-    private Double longitude;
+
 
     public Transaction(int id, TransactionCategory transactionCategory, String transactionName,
-                       double transactionAmount, LocalDate transactionDate, String transactionType,  String locationName,
-     Double latitude,
-     Double longitude) {
+                       double transactionAmount, LocalDate transactionDate, String transactionType) {
         this.id = id;
         this.transactionCategory = transactionCategory;
         this.transactionName = transactionName;
         this.transactionAmount = transactionAmount;
         this.transactionDate = transactionDate;
         this.transactionType = transactionType;
-        this.locationName = locationName;
-        this.latitude = latitude;
-        this.longitude = longitude;
+
     }
 
     public int getId() {
@@ -72,13 +66,5 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
-    public String getLocationName() {return locationName;}
 
-    public void setLocationName(String locationName) {this.locationName = locationName;}
-
-    public Double getLatitude() {return latitude;}
-
-    public void setLatitude(Double latitude) {this.latitude = latitude;}
-
-    public Double getLongitude() {return longitude;}
 }

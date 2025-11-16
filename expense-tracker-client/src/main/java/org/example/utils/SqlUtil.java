@@ -1,4 +1,5 @@
 package org.example.utils;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -22,6 +23,36 @@ import com.google.gson.JsonParser;
 
 public class SqlUtil {
     // get
+
+    public static double fetchRate(String fromCurrency, String toCurrency) throws Exception {
+
+        // Use USD as base (much easier for cross-conversion)
+        String urlStr = "https://open.er-api.com/v6/latest/USD";
+        URL url = new URL(urlStr);
+
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        StringBuilder response = new StringBuilder();
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            response.append(line);
+        }
+        reader.close();
+
+        JsonObject json = JsonParser.parseString(response.toString()).getAsJsonObject();
+        JsonObject rates = json.getAsJsonObject("rates");
+
+        double rateFrom = rates.get(fromCurrency).getAsDouble(); // USD → FROM
+        double rateTo   = rates.get(toCurrency).getAsDouble();   // USD → TO
+
+        // Convert FROM → USD → TO
+        return rateTo / rateFrom;
+    }
+
+
     public static User getUserByEmail(String userEmail){
         // authenticate email and password
         HttpURLConnection conn = null;
@@ -99,13 +130,14 @@ public class SqlUtil {
         HttpURLConnection conn = null;
         try{
             conn = ApiUtil.fetchApi(
-                    "/api/v1/transactions/recent/user/" + userId +
+                    "/api/v1/transaction/recent/user/" + userId +
                             "?startPage=" + startPage + "&endPage=" + endPage + "&size=" + size,
                     ApiUtil.RequestMethod.GET,
                     null
             );
 
             if(conn.getResponseCode() != 200){
+                System.out.println("Error(getAllTransactionCategoriesByUser): " + conn.getResponseCode());
                 return null;
             }
 
@@ -134,9 +166,6 @@ public class SqlUtil {
                 double transactionAmount = transactionJsonObj.get("transactionAmount").getAsDouble();
                 LocalDate transactionDate = LocalDate.parse(transactionJsonObj.get("transactionDate").getAsString());
                 String transactionType = transactionJsonObj.get("transactionType").getAsString();
-                String location = transactionJsonObj.get("location").getAsString();
-                double latitude = transactionJsonObj.get("latitude").getAsDouble();
-                double longitude = transactionJsonObj.get("longitude").getAsDouble();
 
                 Transaction transaction = new Transaction(
                         transactionId,
@@ -144,11 +173,7 @@ public class SqlUtil {
                         transactionName,
                         transactionAmount,
                         transactionDate,
-                        transactionType,
-                        location,
-                        latitude,
-                        longitude
-
+                        transactionType
                 );
 
                 recentTransactions.add(transaction);
@@ -212,9 +237,7 @@ public class SqlUtil {
                 LocalDate transactionDate = LocalDate.parse(transactionJsonObj.get("transactionDate").getAsString());
                 String transactionType = transactionJsonObj.get("transactionType").getAsString();
 
-                String location = transactionJsonObj.get("location").getAsString();
-                double latitude = transactionJsonObj.get("latitude").getAsDouble();
-                double longitude = transactionJsonObj.get("longitude").getAsDouble();
+
 
                 Transaction transaction = new Transaction(
                         transactionId,
@@ -222,10 +245,7 @@ public class SqlUtil {
                         transactionName,
                         transactionAmount,
                         transactionDate,
-                        transactionType,
-                        location,
-                        latitude,
-                        longitude
+                        transactionType
 
                 );
                 transactions.add(transaction);
@@ -337,7 +357,7 @@ public class SqlUtil {
         HttpURLConnection conn = null;
         try{
             conn = ApiUtil.fetchApi(
-                    "/api/v1/transaction-category",
+                    "/api/v1/transaction-categories",
                     ApiUtil.RequestMethod.POST,
                     transactionCategoryData
             );
@@ -417,7 +437,7 @@ public class SqlUtil {
 
         try{
             conn = ApiUtil.fetchApi(
-                    "/api/v1/transaction-category/" + categoryId + "?newCategoryName=" + encodedCategoryName +
+                    "/api/v1/transaction-categories/" + categoryId + "?newCategoryName=" + encodedCategoryName +
                             "&newCategoryColor=" + encodedCategoryColor,
                     ApiUtil.RequestMethod.PUT,
                     null
@@ -445,7 +465,7 @@ public class SqlUtil {
         HttpURLConnection conn = null;
         try{
             conn = ApiUtil.fetchApi(
-                    "/api/v1/transaction-category/" + categoryId,
+                    "/api/v1/transaction-categories/" + categoryId,
                     ApiUtil.RequestMethod.DELETE,
                     null
             );

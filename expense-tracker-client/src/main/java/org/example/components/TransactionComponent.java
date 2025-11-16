@@ -35,7 +35,7 @@ public class TransactionComponent extends HBox {
         Region region = new Region();
         HBox.setHgrow(region, Priority.ALWAYS);
 
-        transactionAmountLabel = new Label("$" + transaction.getTransactionAmount());
+        transactionAmountLabel = new Label("" + transaction.getTransactionAmount());
         transactionAmountLabel.getStyleClass().add("text-size-md");
         if(transaction.getTransactionType().equalsIgnoreCase("expense")){
             transactionAmountLabel.getStyleClass().add("text-light-red");

@@ -15,17 +15,27 @@ import org.example.utils.ViewNavigator;
 
 import java.math.BigDecimal;
 import java.time.Year;
+import java.util.Objects;
 
 public class DashboardView {
-    private String email;
-    private LoadingAnimationPane loadingAnimationPane;
-    private Label currentBalanceLabel, currentBalance;
-    private Label totalIncomeLabel, totalIncome;
-    private Label totalExpenseLabel, totalExpense;
+    private final String email;
+    private final LoadingAnimationPane loadingAnimationPane;
+    private final Label currentBalanceLabel;
+    private final Label currentBalance;
+    private final Label totalIncomeLabel;
+    private final Label totalIncome;
+    private final Label totalExpenseLabel;
+    private final Label totalExpense;
 
     private ComboBox<Integer> yearComboBox;
-    private Button addTransactionButton, viewChartButton;
+    private final Button addTransactionButton;
+    private Button viewChartButton;
     private VBox recentTransactionBox;
+
+    private Button convertCurrencyButton;  // NEW
+    private ComboBox<String> toCurrencyDrop;
+    public ComboBox<String> getToCurrencyDrop() { return toCurrencyDrop; }
+    public Button getConvertCurrencyButton() { return convertCurrencyButton; }
     private ScrollPane recentTransactionsScrollPane;
 
     private MenuItem createCategoryMenuItem, viewCategoriesMenuItem, logoutMenuItem;
@@ -49,14 +59,14 @@ public class DashboardView {
         currentBalance = new Label("₹0.00");
         totalIncome = new Label("₹0.00");
         totalExpense = new Label("₹0.00");
+
     }
 
     public void show(){
         Scene scene = createScene();
-        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
 
-        new DashboardController(this);
-
+        Platform.runLater(() -> new DashboardController(this));
         scene.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
@@ -144,12 +154,13 @@ public class DashboardView {
         columnConstraint.setPercentWidth(50);
         gridPane.getColumnConstraints().addAll(columnConstraint, columnConstraint);
 
-        // transaction table summary (left side)
+        // transaction table summary (left side
         VBox transactionsTableSummaryBox = new VBox(20);
+        VBox currencyBox = createCurrencyConverterBox();  // ADD THIS LINE
         HBox yearComboBoxAndChartButtonBox = createYearComboBoxAndChartButtonBox();
         VBox transactionTableContentBox = createTransactionsTableContentBox();
         VBox.setVgrow(transactionTableContentBox, Priority.ALWAYS);
-        transactionsTableSummaryBox.getChildren().addAll(yearComboBoxAndChartButtonBox, transactionTableContentBox);
+        transactionsTableSummaryBox.getChildren().addAll(currencyBox, yearComboBoxAndChartButtonBox, transactionTableContentBox);
 
         // recent transactions (right side)
         VBox recentTransactionsVBox = createRecentTransactionsVBox();
@@ -172,6 +183,20 @@ public class DashboardView {
 
         hbox.getChildren().addAll(yearComboBox, viewChartButton);
         return hbox;
+    }
+
+    private VBox createCurrencyConverterBox() {
+        VBox box = new VBox(10);
+
+        toCurrencyDrop = new ComboBox<>();
+        toCurrencyDrop.getItems().addAll("INR", "USD", "EUR", "GBP", "AUD", "CAD", "JPY", "AED");
+        toCurrencyDrop.setValue("USD"); // default target
+
+        convertCurrencyButton = new Button("Convert");
+        convertCurrencyButton.getStyleClass().addAll("field-background", "text-light-gray", "text-size-md");
+
+        box.getChildren().addAll(toCurrencyDrop, convertCurrencyButton);
+        return box;
     }
 
     private VBox createTransactionsTableContentBox(){
@@ -225,7 +250,6 @@ public class DashboardView {
         recentTransactionsVBox.getChildren().addAll(recenTransactionLabelandAddBtnBox, recentTransactionsScrollPane);
         return recentTransactionsVBox;
     }
-
     @SuppressWarnings("Convert2Lambda")
     private void resizeTableWidthColumns(){
         Platform.runLater(new Runnable() {
